@@ -3,16 +3,11 @@ package com.olchik.producer
 import java.util.UUID.randomUUID
 
 
-object ProducerApp extends App with KafkaMixin {
+object ProducerApp extends App with ProducerMixin {
   println("Initialize Kafka messages producer")
 
-  try {
-    while (true)
-      writeAndSleep()
-  }
-  finally {
-    producer.close()
-  }
+  while (true)
+    writeAndSleep()
 
   def writeAndSleep(interval: Long=1000): Unit = {
     writeToKafka(genKey, genMessage)
