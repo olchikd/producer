@@ -29,7 +29,7 @@ object PurchaseItemGenerator extends ItemGenerator {
     val purchase = Purchase(
       asin=randomItem(subitems),
       name=randomItem(people),
-      count=rand.nextInt() + 1,
+      count=rand.nextInt(3) + 1,
       createdAt=timeFormater.format(new java.util.Date))
     (randomUUID().toString, writeJson(purchase))
   }

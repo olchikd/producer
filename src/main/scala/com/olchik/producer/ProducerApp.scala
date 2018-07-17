@@ -22,7 +22,7 @@ object ProducerApp extends App with ProducerMixin {
     publishedBooks.append(id)
     Thread.sleep(500)
 
-    val (purchaseId, purchase) = BookItemGenerator.genRow(publishedBooks)
+    val (purchaseId, purchase) = PurchaseItemGenerator.genRow(publishedBooks)
     writeToKafka(purchaseId, purchase, "Purchase the book", "purchases")
     Thread.sleep(500)
   }
