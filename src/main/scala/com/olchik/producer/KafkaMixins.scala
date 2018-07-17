@@ -21,13 +21,11 @@ trait ProducerMixin extends KafkaMixin {
 
   protected val producer = new KafkaProducer[String, String](props)
 
-  def writeToKafka(key: String, value: String, topicOption: Option[String] = None): Unit = {
-    val topic = topicOption match {
-      case Some(t) => t
-      case None => AppConfig.KafkaTopic
-    }
+  def writeToKafka(key: String, value: String,
+                   message: String = "Sending key",
+                   topic: String = "topic"): Unit = {
     val record = new ProducerRecord(topic, key, value)
-    println(s"Sending key: '${record.key}', value '${record.value}'")
+    println(s"$message: '${record.key}' - '${record.value}'")
     producer.send(record)
   }
 
