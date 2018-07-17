@@ -21,9 +21,13 @@ lazy val root = (project in file(".")).
 
     coverageHighlighting := true,
 
-    libraryDependencies += "org.apache.kafka" % "kafka-clients" % "1.1.0",
+    libraryDependencies ++= Seq(
+      "org.apache.kafka" % "kafka-clients" % "1.1.0",
+      "net.liftweb" %% "lift-json" % "3.3.0",
+      "com.github.tototoshi" %% "scala-csv" % "1.3.5"),
 
-    // uses compile classpath for the run task, including "provided" jar (cf http://stackoverflow.com/a/21803413/3827)
+
+        // uses compile classpath for the run task, including "provided" jar (cf http://stackoverflow.com/a/21803413/3827)
     run in Compile := Defaults.runTask(fullClasspath in Compile, mainClass in (Compile, run), runner in (Compile, run)).evaluated,
 
     // set the main class for 'sbt run'

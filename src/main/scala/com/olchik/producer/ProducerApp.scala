@@ -3,6 +3,11 @@ package com.olchik.producer
 import java.util.UUID.randomUUID
 
 
+trait ItemGenerator {
+  def genRow: (String, String) = (randomUUID().toString, "message")
+}
+
+
 object ProducerApp extends App with ProducerMixin {
   println("Initialize Kafka messages producer")
 
@@ -10,14 +15,8 @@ object ProducerApp extends App with ProducerMixin {
     writeAndSleep()
 
   def writeAndSleep(interval: Long=1000): Unit = {
-    writeToKafka(genKey, genMessage)
+    val (key, value) = AppConfig.CurrItemGenerator.genRow
+    writeToKafka(key, value)
     Thread.sleep(interval)
-  }
-
-  def genKey = randomUUID().toString
-  def genMessage(): String = {
-    val now = new java.util.Date
-    val formater = new java.text.SimpleDateFormat("mm:hh:ss")
-    s"message at ${formater.format(now)}"
   }
 }
