@@ -18,7 +18,7 @@ object ProducerApp extends App with ProducerMixin {
   while (true) {
     // Publishing new books
     val (id, book) = BookItemGenerator.genRow
-    writeToKafka(id, book, "Publish the book")
+    writeToKafka(id, book, "Publish the book", "books")
     publishedBooks.append(id)
     Thread.sleep(500)
 

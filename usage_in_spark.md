@@ -1,8 +1,11 @@
 Zeppeling Notebook
 ==================
 
-Working with static data
-------------------------
+1 Join Stream with static data
+------------------------------
+
+There are books CSV file and publishing books stream.
+
 Loading data from CSV file:
 
     %spark
@@ -16,10 +19,7 @@ Loading data from CSV file:
     val categoriesDf = categories.toDF("id", "name").
       selectExpr("cast(id as int) id", "name")
     z.show(categoriesDf)
-
-
-Structured streaming
---------------------
+    
 
 Create stream and join with static data:
 
@@ -56,7 +56,72 @@ Create stream and join with static data:
         queryName("messages").
         start()
     spark.table("messages").printSchema
-
-Displaying results:
-
     z.show(spark.sql("select key, valuejson.title, valuejson.author, category, timestamp from messages"))
+    
+2 Join publishing and purchasing books streams by book id asin
+--------------------------------------------------------------
+
+    %spark
+    import org.apache.spark.sql.types._
+    import org.apache.spark.sql.functions._
+    
+    // Config
+    val KafkaServer = "localhost:9092"
+    val schema: StructType = new StructType().
+      add("asin", "string").
+      add("name", "string").
+      add("count", "integer").
+      add("createdAt", "string")
+      
+    // Books purchasing stream
+    val purchaseDf = spark.
+        readStream.format("kafka").
+        option("kafka.bootstrap.servers", KafkaServer).
+        option("subscribe", "purchases").
+        load().
+        select(
+            $"key".cast(StringType), 
+            $"value".cast(StringType),
+            $"timestamp".alias("purchaseTimestamp"),
+            get_json_object(($"value").cast("string"), "$.asin").alias("bookAsin"),
+            get_json_object(($"value").cast("string"), "$.name").alias("person"),
+            from_json($"value".cast(StringType), schema).alias("purchasejson")).
+        withWatermark("purchaseTimestamp", "100 seconds")
+    
+    
+    // Publishing books stream (join with static data with book's categories)
+    val booksDf = spark.
+        readStream.format("kafka").
+        option("kafka.bootstrap.servers", KafkaServer).
+        option("subscribe", "books").
+        load()
+        
+    val schema: StructType = new StructType().
+      add("asin", "string").
+      add("title", "string").
+      add("author", "string").
+      add("categoryID", "integer").
+      add("genAt", "string")
+    
+    val query = booksDf.
+        select(
+            $"key".cast(StringType), 
+            $"value".cast(StringType),
+            from_json($"value".cast(StringType), schema).alias("bookjson"),
+            get_json_object(($"value").cast("string"), "$.asin").alias("asin"),
+            get_json_object(($"value").cast("string"), "$.categoryID").alias("categoryID"),
+            $"timestamp".alias("bookTimestamp")).
+        withWatermark("bookTimestamp", "100 seconds").
+        join(categoriesDf.withColumnRenamed("name", "category"), categoriesDf.col("id") === $"categoryID").
+        join(purchaseDf, expr("""
+          asin = bookAsin AND
+          purchaseTimestamp >= bookTimestamp AND
+          purchaseTimestamp <= bookTimestamp + interval 1 hour
+          """)).
+        writeStream.
+        format("memory").
+        queryName("books").
+        start()
+    spark.table("books").printSchema
+    
+    z.show(spark.sql("select * from books"))

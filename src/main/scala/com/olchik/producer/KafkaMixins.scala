@@ -23,7 +23,7 @@ trait ProducerMixin extends KafkaMixin {
 
   def writeToKafka(key: String, value: String,
                    message: String = "Sending key",
-                   topic: String = "topic"): Unit = {
+                   topic: String = "test"): Unit = {
     val record = new ProducerRecord(topic, key, value)
     println(s"$message: '${record.key}' - '${record.value}'")
     producer.send(record)
