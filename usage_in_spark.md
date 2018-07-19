@@ -1,8 +1,8 @@
 Zeppeling Notebook
 ==================
 
-1 Join Stream with static data
-------------------------------
+Join Stream with static data
+----------------------------
 
 There are books CSV file and publishing books stream.
 
@@ -58,8 +58,8 @@ Create stream and join with static data:
     spark.table("messages").printSchema
     z.show(spark.sql("select key, valuejson.title, valuejson.author, category, timestamp from messages"))
     
-2 Join publishing and purchasing books streams by book id asin
---------------------------------------------------------------
+Join publishing and purchasing books streams by book id asin
+------------------------------------------------------------
 
     %spark
     import org.apache.spark.sql.types._
@@ -129,7 +129,8 @@ Publishing books stream (join with static data with book's categories)
     
     z.show(spark.sql("select * from books"))
     
-3 Configuring sending metrics to Graphite
+Configuring sending metrics to Graphite
+---------------------------------------
 
 Install graphana and graphite:
 
