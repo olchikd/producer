@@ -65,7 +65,8 @@ Create stream and join with static data:
     import org.apache.spark.sql.types._
     import org.apache.spark.sql.functions._
     
-    // Config
+Config
+
     val KafkaServer = "localhost:9092"
     val schema: StructType = new StructType().
       add("asin", "string").
@@ -73,7 +74,8 @@ Create stream and join with static data:
       add("count", "integer").
       add("createdAt", "string")
       
-    // Books purchasing stream
+Books purchasing stream
+
     val purchaseDf = spark.
         readStream.format("kafka").
         option("kafka.bootstrap.servers", KafkaServer).
@@ -89,7 +91,8 @@ Create stream and join with static data:
         withWatermark("purchaseTimestamp", "100 seconds")
     
     
-    // Publishing books stream (join with static data with book's categories)
+Publishing books stream (join with static data with book's categories)
+
     val booksDf = spark.
         readStream.format("kafka").
         option("kafka.bootstrap.servers", KafkaServer).
@@ -125,3 +128,23 @@ Create stream and join with static data:
     spark.table("books").printSchema
     
     z.show(spark.sql("select * from books"))
+    
+3 Configuring sending metrics to Graphite
+
+Install graphana and graphite:
+
+    https://github.com/hazelcast/docker-grafana-graphite
+
+Add spark interpreter setting in Zeppelin:
+    
+    spark.metrics.conf	/Users/olchik/workspace/home/producer/metrics.properties
+
+Enable sending metrics
+
+    spark.conf.set("spark.sql.streaming.metricsEnabled", "true")
+    
+Grafana dashboard 
+
+    http://localhost/
+    
+Standard user/password:  "admin:admin"
