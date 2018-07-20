@@ -8,7 +8,7 @@ case class Purchase(
   createdAt: String)
 
 
-object PurchaseItemGenerator extends ItemGenerator {
+object PurchaseGenerator extends ItemGenerator {
   val people = Vector("Kolia", "Olchik", "Sofia", "Slavko", "Mih")
   val timeFormater = new java.text.SimpleDateFormat("mm:hh:ss")
 
@@ -31,6 +31,8 @@ object PurchaseItemGenerator extends ItemGenerator {
     * @return Purchase with a book / books
     */
   override def genRow(subitems: Seq[Any]): Any = {
+    // no books in the store
+    if (subitems.isEmpty) return genRow
     val book = RandomUtils.fromSeq(subitems).asInstanceOf[Book]
     Purchase(
       asin=book.asin,

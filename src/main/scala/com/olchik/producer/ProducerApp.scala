@@ -15,21 +15,31 @@ trait ItemGenerator {
 
 
 object ProducerApp extends App with ProducerMixin {
-  println("Initialize Kafka messages producer")
+  println("Initialize Book shop emulator")
   implicit val formats = DefaultFormats // for liftweb json
   val publishedBooks = new ArrayBuffer[Book]()
-  val DelayMs = 500
+  val DelayMean = 500
+  val DelayDisp = DelayMean / 5
+  val generators = Array(BookGenerator, PurchaseGenerator)
 
   while (true) {
-    // Publishing new books
-    val book = BookItemGenerator.genRow.asInstanceOf[Book]
-    writeToKafka(book.asin, writeJson(book), "Publish the book", "books")
-    publishedBooks.append(book)
-    Thread.sleep(DelayMs)
-
-    val purchase = PurchaseItemGenerator.genRow(publishedBooks).asInstanceOf[Purchase]
-    writeToKafka(purchase.asin, writeJson(purchase), "Purchase the book", "purchases")
-    Thread.sleep(500)
+    val generator = RandomUtils.fromSeq(generators)
+    generator match {
+      case BookGenerator => {
+        val book = BookGenerator.genRow.asInstanceOf[Book]
+        writeToKafka(book.asin, writeJson(book), "books")
+        println(Console.BLUE + s"Supply: '${book.title}' (${book.asin})")
+        publishedBooks.append(book)
+      }
+      case PurchaseGenerator => {
+        val purchase = PurchaseGenerator.genRow(publishedBooks).asInstanceOf[Purchase]
+        writeToKafka(purchase.asin, writeJson(purchase), "purchases")
+        println(Console.GREEN + s"Purchase: '${purchase.asin}' by '${purchase.name}'")
+      }
+    }
+    val delay = DelayMean - DelayDisp + RandomUtils.notMoreThan(2 * DelayDisp)
+    println(s"Sleeping $delay ms")
+    Thread.sleep(delay)
   }
 
 }

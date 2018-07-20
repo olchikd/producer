@@ -17,7 +17,7 @@ case class Book(
   * Using http://github.com/uchidalab/book-dataset
   * "[AMAZON INDEX (ASIN)}","[FILENAME]","[IMAGE URL]","[TITLE]","[AUTHOR]","[CATEGORY ID]","[CATEGORY]"
   */
-object BookItemGenerator extends ItemGenerator {
+object BookGenerator extends ItemGenerator {
   val reader = CSVReader.open(new File("./book32-listing.csv"))
   val timeFormater = new java.text.SimpleDateFormat("mm:hh:ss")
 
