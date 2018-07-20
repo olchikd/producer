@@ -1,11 +1,5 @@
 package com.olchik.producer
 
-import java.util.Random
-import java.util.UUID.randomUUID
-
-import net.liftweb.json._
-import net.liftweb.json.Serialization.{write => writeJson}
-
 
 case class Purchase(
   asin: String,
@@ -16,23 +10,32 @@ case class Purchase(
 
 object PurchaseItemGenerator extends ItemGenerator {
   val people = Vector("Kolia", "Olchik", "Sofia", "Slavko", "Mih")
-  val rand = new Random(System.currentTimeMillis())
-
-  implicit val formats = DefaultFormats // for liftweb json
   val timeFormater = new java.text.SimpleDateFormat("mm:hh:ss")
 
   /**
-    * Generates tuple with key as ID and value as json string with info about the purchase.
-    * @return (key, value) pair
+    * No books in the store, but we can buy a pen! :)
+    * @return Purchase with a pen.
     */
-  override def genRow(subitems: Seq[String]): (String, String) = {
-    val purchase = Purchase(
-      asin=randomItem(subitems),
-      name=randomItem(people),
-      count=rand.nextInt(3) + 1,
-      createdAt=timeFormater.format(new java.util.Date))
-    (randomUUID().toString, writeJson(purchase))
+  override def genRow: Any = {
+    Purchase(
+      asin="pen_asin",
+      name="a pen",
+      count=1,
+      createdAt=timeFormater.format(new java.util.Date)
+    )
   }
 
-  def randomItem(seq: Seq[String]) = seq(rand.nextInt(seq.length))
+  /**
+    * Generates the random book purchase.
+    * Note: Emulates book count field depends on book's rating.
+    * @return Purchase with a book / books
+    */
+  override def genRow(subitems: Seq[Any]): Any = {
+    val book = RandomUtils.fromSeq(subitems).asInstanceOf[Book]
+    Purchase(
+      asin=book.asin,
+      name=RandomUtils.fromSeq(people).toString,
+      count= RandomUtils.notMoreThan(book.rating),
+      createdAt=timeFormater.format(new java.util.Date))
+  }
 }

@@ -1,29 +1,34 @@
 package com.olchik.producer
 
+import java.util.Random
 import scala.collection.mutable.ArrayBuffer
-import java.util.UUID.randomUUID
+
+import net.liftweb.json._
+import net.liftweb.json.Serialization.{write => writeJson}
 
 
 trait ItemGenerator {
-  def genRow: (String, String) = (randomUUID().toString, "message")
+  def genRow: Any
 
-  def genRow(subitems: Seq[String]): (String, String) = genRow
+  def genRow(subitems: Seq[Any]): Any
 }
 
 
 object ProducerApp extends App with ProducerMixin {
   println("Initialize Kafka messages producer")
-  val publishedBooks = new ArrayBuffer[String]()
+  implicit val formats = DefaultFormats // for liftweb json
+  val publishedBooks = new ArrayBuffer[Book]()
+  val DelayMs = 500
 
   while (true) {
     // Publishing new books
-    val (id, book) = BookItemGenerator.genRow
-    writeToKafka(id, book, "Publish the book", "books")
-    publishedBooks.append(id)
-    Thread.sleep(500)
+    val book = BookItemGenerator.genRow.asInstanceOf[Book]
+    writeToKafka(book.asin, writeJson(book), "Publish the book", "books")
+    publishedBooks.append(book)
+    Thread.sleep(DelayMs)
 
-    val (purchaseId, purchase) = PurchaseItemGenerator.genRow(publishedBooks)
-    writeToKafka(purchaseId, purchase, "Purchase the book", "purchases")
+    val purchase = PurchaseItemGenerator.genRow(publishedBooks).asInstanceOf[Purchase]
+    writeToKafka(purchase.asin, writeJson(purchase), "Purchase the book", "purchases")
     Thread.sleep(500)
   }
 
