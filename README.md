@@ -46,3 +46,7 @@ or
 Also you could run console Consumer using this command:
 
     $ runMain com.olchik.producer.ConsumerApp
+
+Running tests:
+
+    $ sbt test

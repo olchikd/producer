@@ -19,20 +19,8 @@ import net.liftweb.json.Serialization.{write => writeJson}
 
 object ProducerApp extends App {
   println("Initialize Book shop emulator")
-
   implicit val executor =  scala.concurrent.ExecutionContext.global
   implicit val formats = DefaultFormats // for liftweb json
-
-  val props = new Properties()
-  props.put("bootstrap.servers", AppConfig.KafkaServer)
-  props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-  props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-
-  val producer = new KafkaProducer[String, String](props)
-
-  def writeToKafka(key: String, value: String, topic: String = "test"): Unit = Future {
-    producer.send(new ProducerRecord(topic, key, value))
-  }
 
   CSVReader.open(new File("./book32-listing.csv"))
     .iterator
@@ -58,6 +46,17 @@ object ProducerApp extends App {
       }
     }
     // sleep()
+  }
+
+  val props = new Properties()
+  props.put("bootstrap.servers", AppConfig.KafkaServer)
+  props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+  props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+
+  val producer = new KafkaProducer[String, String](props)
+
+  def writeToKafka(key: String, value: String, topic: String = "test"): Unit = Future {
+    producer.send(new ProducerRecord(topic, key, value))
   }
 
   def sleep(delayMean: Int = 500, delayDisp: Int = 10): Unit ={

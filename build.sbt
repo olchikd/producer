@@ -24,7 +24,11 @@ lazy val root = (project in file(".")).
     libraryDependencies ++= Seq(
       "org.apache.kafka" % "kafka-clients" % "1.1.0",
       "net.liftweb" %% "lift-json" % "3.3.0",
-      "com.github.tototoshi" %% "scala-csv" % "1.3.5"),
+      "com.github.tototoshi" %% "scala-csv" % "1.3.5",
+      "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+      "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
+      "net.manub" %% "scalatest-embedded-kafka" % "1.1.0" % "test"
+    ),
 
 
         // uses compile classpath for the run task, including "provided" jar (cf http://stackoverflow.com/a/21803413/3827)
