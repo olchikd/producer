@@ -59,9 +59,9 @@ object ProducerApp extends App {
     sleep()
   }
 
-  def sleep(delayMean: Int = 500, delayDisp: Int = 10): Unit ={
+  def sleep(delayMean: Int = 4, delayDisp: Int = 2): Unit ={
     val delay = delayMean - delayDisp + RandomUtils.notMoreThan(2 * delayDisp)
-    println(s"Sleeping $delay ms")
+    // println(s"Sleeping $delay ms")
     Thread.sleep(delay)
   }
 }
